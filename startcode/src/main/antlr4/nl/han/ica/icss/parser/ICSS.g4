@@ -52,7 +52,10 @@ ASSIGNMENT_OPERATOR: ':=';
 //--- PARSER: ---
 stylesheet: variabels stylerule*;
 stylerule: selector+ OPEN_BRACE (decleration+) CLOSE_BRACE;
-selector: ID_IDENT | CLASS_IDENT | HTML_IDENT;
+selector: id_selector | class_selector | tag_selector;
+id_selector: ID_IDENT;
+class_selector: CLASS_IDENT;
+tag_selector: HTML_IDENT;
 decleration: property COLON value SEMICOLON | if_expression;
 property: LOWER_IDENT;
 value: LITERAL | CAPITAL_IDENT;
