@@ -10,6 +10,7 @@ BOX_BRACKET_CLOSE: ']';
 
 
 //Literals
+LITERAL: TRUE | FALSE | PIXELSIZE | PERCENTAGE | SCALAR | COLOR;
 TRUE: 'TRUE';
 FALSE: 'FALSE';
 PIXELSIZE: [0-9]+ 'px';
@@ -23,6 +24,10 @@ COLOR: '#' [0-9a-f] [0-9a-f] [0-9a-f] [0-9a-f] [0-9a-f] [0-9a-f];
 //Specific identifiers for id's and css classes
 ID_IDENT: '#' [a-z0-9\-]+;
 CLASS_IDENT: '.' [a-z0-9\-]+;
+
+HTML_IDENT: LINK | PARAGRAPH;
+LINK: 'a';
+PARAGRAPH: 'p';
 
 //General identifiers
 LOWER_IDENT: [a-z] [a-z0-9\-]*;
@@ -45,5 +50,15 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: EOF;
+stylesheet: variabel* section*;
+section: selector+ OPEN_BRACE (decleration+) CLOSE_BRACE;
+selector: ID_IDENT | CLASS_IDENT | HTML_IDENT;
+decleration: property COLON value SEMICOLON | if_expression;
+property: LOWER_IDENT;
+value: LITERAL | CAPITAL_IDENT;
+variabel: CAPITAL_IDENT ASSIGNMENT_OPERATOR LITERAL SEMICOLON;
+if_expression: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_expression)?;
+expression: CAPITAL_IDENT;
+body: decleration+;
+else_expression: ELSE OPEN_BRACE body CLOSE_BRACE;
 
