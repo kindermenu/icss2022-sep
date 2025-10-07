@@ -51,27 +51,27 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: variabels stylerule*;
-stylerule: selector+ OPEN_BRACE (decleration+) CLOSE_BRACE;
+stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE;
 selector: id_selector | class_selector | tag_selector;
 id_selector: ID_IDENT;
 class_selector: CLASS_IDENT;
 tag_selector: HTML_IDENT;
-decleration: property COLON value SEMICOLON | if_expression;
+declaration: property COLON value SEMICOLON | if_expression;
 property: LOWER_IDENT;
 value: LITERAL | CAPITAL_IDENT;
 variabels: variabel*;
 variabel: CAPITAL_IDENT ASSIGNMENT_OPERATOR LITERAL SEMICOLON;
 if_expression: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_expression)?;
 expression: CAPITAL_IDENT;
-body: decleration+;
+body: declaration+;
 else_expression: ELSE OPEN_BRACE body CLOSE_BRACE;
 
 // demo //
 
 //stylesheet: stylerule;
-//stylerule: id_selector OPEN_BRACE decleration CLOSE_BRACE;
+//stylerule: id_selector OPEN_BRACE declaration CLOSE_BRACE;
 //id_selector: ID_IDENT;
-//decleration: property COLON pixel_literal SEMICOLON;
+//declaration: property COLON pixel_literal SEMICOLON;
 //property: LOWER_IDENT;
 //pixel_literal: PIXELSIZE;
 
