@@ -71,4 +71,52 @@ public class ASTListener extends ICSSBaseListener {
 		IdSelector idSelector = (IdSelector) currentContainer.pop();
 		currentContainer.peek().addChild(idSelector);
 	}
+
+	@Override
+	public void enterClass_selector(ICSSParser.Class_selectorContext ctx) {
+		ClassSelector classSelector = new ClassSelector(ctx.getText());
+		currentContainer.push(classSelector);
+	}
+
+	@Override
+	public void exitClass_selector(ICSSParser.Class_selectorContext ctx) {
+		ClassSelector classSelector = (ClassSelector) currentContainer.pop();
+		currentContainer.peek().addChild(classSelector);
+	}
+
+	@Override
+	public void enterTag_selector(ICSSParser.Tag_selectorContext ctx) {
+		TagSelector tagSelector = new TagSelector(ctx.getText());
+		currentContainer.push(tagSelector);
+	}
+
+	@Override
+	public void exitTag_selector(ICSSParser.Tag_selectorContext ctx) {
+		TagSelector tagSelector = (TagSelector) currentContainer.pop();
+		currentContainer.peek().addChild(tagSelector);
+	}
+
+	@Override
+	public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
+		Declaration declaration = new Declaration(ctx.getText());
+		currentContainer.push(declaration);
+	}
+
+	@Override
+	public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
+		Declaration declaration = (Declaration) currentContainer.pop();
+		currentContainer.peek().addChild(declaration);
+	}
+
+	@Override
+	public void enterProperty(ICSSParser.PropertyContext ctx) {
+		Property property = new Property(ctx.getText());
+		currentContainer.push(property);
+	}
+
+	@Override
+	public void exitProperty(ICSSParser.DeclarationContext ctx) {
+		Declaration declaration = (Declaration) currentContainer.pop();
+		currentContainer.peek().addChild(declaration);
+	}
 }
