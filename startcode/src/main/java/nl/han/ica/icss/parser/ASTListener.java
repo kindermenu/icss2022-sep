@@ -176,33 +176,93 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
+	public void exitAdd_operation(ICSSParser.Add_operationContext ctx) {
+		AddOperation value = (AddOperation) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterAdd_operation(ICSSParser.Add_operationContext ctx) {
+		AddOperation value = new AddOperation();
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitSubtract_operation(ICSSParser.Subtract_operationContext ctx) {
+		SubtractOperation value = (SubtractOperation) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterSubtract_operation(ICSSParser.Subtract_operationContext ctx) {
+		SubtractOperation value = new SubtractOperation();
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitMultiply_operation(ICSSParser.Multiply_operationContext ctx) {
+		MultiplyOperation value = (MultiplyOperation) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterMultiply_operation(ICSSParser.Multiply_operationContext ctx) {
+		MultiplyOperation value = new MultiplyOperation();
+		currentContainer.push(value);
+	}
+
+	@Override
 	public void exitColor_literal(ICSSParser.Color_literalContext ctx) {
 		ColorLiteral value = (ColorLiteral) currentContainer.pop();
 		currentContainer.peek().addChild(value);
 	}
 
-//	@Override
-//	public void enterElse_clause(ICSSParser.Else_clauseContext ctx) {
-//		ElseClause value = new ElseClause(ctx.getText());
-//		currentContainer.push(value);
-//	}
-//
-//	@Override
-//	public void exitElse_clause(ICSSParser.Else_clauseContext ctx) {
-//		ElseClause value = (ElseClause) currentContainer.pop();
-//		currentContainer.peek().addChild(value);
-//	}
-//
-//	@Override
-//	public void enterIf_clause(ICSSParser.If_clauseContext ctx) {
-//		IfClause value = new IfClause(ctx.getText());
-//		currentContainer.push(value);
-//	}
-//
-//	@Override
-//	public void exitIf_clause(ICSSParser.If_clauseContext ctx) {
-//		IfClause value = (IfClause) currentContainer.pop();
-//		currentContainer.peek().addChild(value);
-//	}
+	@Override
+	public void enterElse_clause(ICSSParser.Else_clauseContext ctx) {
+		ElseClause value = new ElseClause();
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitElse_clause(ICSSParser.Else_clauseContext ctx) {
+		ElseClause value = (ElseClause) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterIf_clause(ICSSParser.If_clauseContext ctx) {
+		IfClause value = new IfClause();
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitIf_clause(ICSSParser.If_clauseContext ctx) {
+		IfClause value = (IfClause) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterVariable_assignment(ICSSParser.Variable_assignmentContext ctx) {
+		VariableAssignment value = new VariableAssignment();
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitVariable_assignment(ICSSParser.Variable_assignmentContext ctx) {
+		VariableAssignment value = (VariableAssignment) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterVariable_reference(ICSSParser.Variable_referenceContext ctx) {
+		VariableReference value = new VariableReference(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitVariable_reference(ICSSParser.Variable_referenceContext ctx) {
+		VariableReference value = (VariableReference) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
 
 }
