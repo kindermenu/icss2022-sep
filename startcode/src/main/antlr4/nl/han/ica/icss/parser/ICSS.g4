@@ -51,28 +51,17 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: stylerule*;
-stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE | variabel+;
+stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE | variable+;
 selector: ID_IDENT #id_selector | CLASS_IDENT #class_selector | HTML_IDENT #tag_selector;
-declaration: property COLON value SEMICOLON | if_expression;
+declaration: property COLON value SEMICOLON | if_clause;
 property: LOWER_IDENT;
-value: literal | CAPITAL_IDENT;
+value: sum | literal | variable_value ;
+variable_value: CAPITAL_IDENT | LOWER_IDENT;
 literal: bool #bool_literal | PIXELSIZE #pixel_literal | PERCENTAGE #percentage_literal | SCALAR #scalar_literal | COLOR #color_literal;
 bool: TRUE | FALSE;
-variabel: CAPITAL_IDENT ASSIGNMENT_OPERATOR value SEMICOLON;
-if_expression: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_expression)?;
-expression: CAPITAL_IDENT;
+variable: CAPITAL_IDENT ASSIGNMENT_OPERATOR value SEMICOLON;
+if_clause: IF BOX_BRACKET_OPEN bool BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_clause)?;
 body: declaration+;
-else_expression: ELSE OPEN_BRACE body CLOSE_BRACE;
-//som:
-//    PIXELSIZE #pixel_literal |
-//    expression PLUS expression #addOperation;
-
-// demo //
-
-//stylesheet: stylerule;
-//stylerule: id_selector OPEN_BRACE declaration CLOSE_BRACE;
-//id_selector: ID_IDENT;
-//declaration: property COLON pixel_literal SEMICOLON;
-//property: LOWER_IDENT;
-//pixel_literal: PIXELSIZE;
+else_clause: ELSE OPEN_BRACE body CLOSE_BRACE;
+sum: sum (PLUS | MIN | MUL) sum | literal;
 
