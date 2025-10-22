@@ -10,7 +10,7 @@ BOX_BRACKET_CLOSE: ']';
 
 
 //Literals
-LITERAL: TRUE | FALSE | PIXELSIZE | PERCENTAGE | SCALAR | COLOR;
+//LITERAL: TRUE | FALSE | PIXELSIZE | PERCENTAGE | SCALAR | COLOR;
 TRUE: 'TRUE';
 FALSE: 'FALSE';
 PIXELSIZE: [0-9]+ 'px';
@@ -50,18 +50,22 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: variabels stylerule*;
-stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE;
+stylesheet: stylerule*;
+stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE | variabel+;
 selector: ID_IDENT #id_selector | CLASS_IDENT #class_selector | HTML_IDENT #tag_selector;
 declaration: property COLON value SEMICOLON | if_expression;
 property: LOWER_IDENT;
-value: LITERAL | CAPITAL_IDENT;
-variabels: variabel*;
-variabel: CAPITAL_IDENT ASSIGNMENT_OPERATOR LITERAL SEMICOLON;
+value: literal | CAPITAL_IDENT;
+literal: bool #bool_literal | PIXELSIZE #pixel_literal | PERCENTAGE #percentage_literal | SCALAR #scalar_literal | COLOR #color_literal;
+bool: TRUE | FALSE;
+variabel: CAPITAL_IDENT ASSIGNMENT_OPERATOR value SEMICOLON;
 if_expression: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_expression)?;
 expression: CAPITAL_IDENT;
 body: declaration+;
 else_expression: ELSE OPEN_BRACE body CLOSE_BRACE;
+//som:
+//    PIXELSIZE #pixel_literal |
+//    expression PLUS expression #addOperation;
 
 // demo //
 

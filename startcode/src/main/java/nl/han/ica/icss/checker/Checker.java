@@ -14,12 +14,12 @@ public class Checker {
     public void check(AST ast) {
         // variableTypes = new HANLinkedList<>();
         checkStylesheet(ast.root);
-
-
     }
 
     public void checkStylesheet(Stylesheet sheet){
-        checkStylerule((Stylerule)sheet.getChildren().get(0));
+        for (ASTNode stylerule : sheet.getChildren()) {
+            checkStylerule((Stylerule) stylerule);
+        }
     }
 
     private void checkStylerule(Stylerule rule) {
@@ -31,12 +31,11 @@ public class Checker {
     }
 
     private void checkDeclaration(Declaration declaration) {
-        if (declaration.property.equals("width")){
+        if (declaration.property.name.equals("width")){
             if (declaration.expression instanceof ColorLiteral){
                 declaration.setError("Property 'width' can't be a color");
             }
         }
     }
-
 
 }

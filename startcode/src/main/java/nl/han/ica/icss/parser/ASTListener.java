@@ -110,13 +110,75 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterProperty(ICSSParser.PropertyContext ctx) {
-		Property property = new Property(ctx.getText());
+		PropertyName property = new PropertyName(ctx.getText());
 		currentContainer.push(property);
 	}
 
 	@Override
-	public void exitProperty(ICSSParser.DeclarationContext ctx) {
-		Declaration declaration = (Declaration) currentContainer.pop();
-		currentContainer.peek().addChild(declaration);
+	public void exitProperty(ICSSParser.PropertyContext ctx) {
+		PropertyName property = (PropertyName) currentContainer.pop();
+		currentContainer.peek().addChild(property);
 	}
+
+	// LITERALS
+	@Override
+	public void enterPixel_literal(ICSSParser.Pixel_literalContext ctx) {
+		PixelLiteral value = new PixelLiteral(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitPixel_literal(ICSSParser.Pixel_literalContext ctx) {
+		PixelLiteral value = (PixelLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterBool(ICSSParser.BoolContext ctx) {
+		BoolLiteral value = new BoolLiteral(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitBool(ICSSParser.BoolContext ctx) {
+		BoolLiteral value = (BoolLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterPercentage_literal(ICSSParser.Percentage_literalContext ctx) {
+		PercentageLiteral value = new PercentageLiteral(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitPercentage_literal(ICSSParser.Percentage_literalContext ctx) {
+		PercentageLiteral value = (PercentageLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterScalar_literal(ICSSParser.Scalar_literalContext ctx) {
+		ScalarLiteral value = new ScalarLiteral(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitScalar_literal(ICSSParser.Scalar_literalContext ctx) {
+		ScalarLiteral value = (ScalarLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	@Override
+	public void enterColor_literal(ICSSParser.Color_literalContext ctx) {
+		ColorLiteral value = new ColorLiteral(ctx.getText());
+		currentContainer.push(value);
+	}
+
+	@Override
+	public void exitColor_literal(ICSSParser.Color_literalContext ctx) {
+		ColorLiteral value = (ColorLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
 }
