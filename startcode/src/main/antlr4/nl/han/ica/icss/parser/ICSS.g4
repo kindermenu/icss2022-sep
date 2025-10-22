@@ -50,18 +50,30 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: stylerule*;
-stylerule: selector+ OPEN_BRACE (declaration+) CLOSE_BRACE | variable+;
+stylesheet: (variable_assignment| stylerule)*;
+stylerule: selector OPEN_BRACE (if_clause | declaration)+ CLOSE_BRACE;
 selector: ID_IDENT #id_selector | CLASS_IDENT #class_selector | HTML_IDENT #tag_selector;
-declaration: property COLON value SEMICOLON | if_clause;
+declaration: property COLON value SEMICOLON;
 property: LOWER_IDENT;
-value: sum | literal | variable_value ;
-variable_value: CAPITAL_IDENT | LOWER_IDENT;
+value: literal | variable_reference | operation;
+variable_reference: CAPITAL_IDENT;
 literal: bool #bool_literal | PIXELSIZE #pixel_literal | PERCENTAGE #percentage_literal | SCALAR #scalar_literal | COLOR #color_literal;
 bool: TRUE | FALSE;
-variable: CAPITAL_IDENT ASSIGNMENT_OPERATOR value SEMICOLON;
-if_clause: IF BOX_BRACKET_OPEN bool BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_clause)?;
-body: declaration+;
+variable_assignment: variable_reference ASSIGNMENT_OPERATOR value SEMICOLON;
+if_clause: IF BOX_BRACKET_OPEN (bool | variable_reference) BOX_BRACKET_CLOSE OPEN_BRACE body CLOSE_BRACE (else_clause)?;
+body: (if_clause | declaration)*;
 else_clause: ELSE OPEN_BRACE body CLOSE_BRACE;
-sum: sum (PLUS | MIN | MUL) sum | literal;
+
+operation:
+    literal #operation_literal | variable_reference #opperation_value |
+    operation MUL operation #multiply_operation |
+    operation MIN operation #subtract_operation |
+    operation PLUS operation #add_operation;
+
+//operation: subtract_operation;
+//subtract_operation: subtract_operation MIN add_operation | add_operation;
+//add_operation: add_operation PLUS multiply_operation | multiply_operation;
+//multiply_operation: multiply_operation MUL factor | factor;
+//factor: literal | variable_reference;
+
 
