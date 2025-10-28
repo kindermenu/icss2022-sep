@@ -21,11 +21,13 @@ public class Checker {
 
     public void checkStylesheet(Stylesheet sheet){
         for (ASTNode child : sheet.getChildren()) {
-            if (child instanceof Stylerule) {
-                checkStylerule((Stylerule) child);
-            }
             if (child instanceof VariableAssignment) {
                 checkVariableAssignment((VariableAssignment) child);
+            }
+            if (child instanceof Stylerule) {
+                variableTypes.add(new HashMap<>(variableTypes.getLast()));
+                checkStylerule((Stylerule) child);
+                variableTypes.removeLast();
             }
         }
     }
@@ -38,11 +40,8 @@ public class Checker {
         ExpressionType type = getExpressionType(expression);
         name = node.name.name;
 
-        HashMap<String, ExpressionType> currentScope = variableTypes.getLast();
-        currentScope.put(name, type);
-
-        variableTypes.add(currentScope);
-        System.out.println(currentScope);
+        variableTypes.getLast().put(name, type);
+        System.out.println(variableTypes);
     }
 
     private ExpressionType getExpressionType(Expression expression) {
@@ -60,8 +59,32 @@ public class Checker {
             if (child instanceof Declaration){
                 checkDeclaration((Declaration)child);
             }
+            if (child instanceof IfClause){
+                checkIfClause((IfClause)child);
+            }
         }
     }
+
+    private void checkIfClause(IfClause node) {
+        Expression expr = node.conditionalExpression;
+        ExpressionType type;
+
+        if (expr instanceof VariableReference) {
+            String name = ((VariableReference) expr).name;
+            type = variableTypes.getLast().get(name);
+            if (type == null) {
+                node.setError("Variable '" + name + "' is not defined in this scope");
+                type = UNDEFINED;
+            }
+        } else {
+            type = getExpressionType(expr);
+        }
+
+        if (type != ExpressionType.BOOL) {
+            node.setError("Condition clause must contain a boolean");
+        }
+    }
+
 
     private void checkDeclaration(Declaration declaration) {
         Expression expr = declaration.expression;
@@ -69,7 +92,11 @@ public class Checker {
 
         if (expr instanceof VariableReference) {
             String name = ((VariableReference) expr).name;
-            type = variableTypes.getLast().getOrDefault(name, UNDEFINED);
+            type = variableTypes.getLast().get(name);
+            if (type == null) {
+                declaration.setError("Variable '" + name + "' is not defined in this scope");
+                type = UNDEFINED;
+            }
         }
         else{
             type = getExpressionType(expr);
@@ -88,5 +115,7 @@ public class Checker {
             if (type != ExpressionType.COLOR)
                 declaration.setError("Property '" + declaration.property.name + "' must be a color");
         }
+
+        checkOperation(declaration.property.)
     }
 }
