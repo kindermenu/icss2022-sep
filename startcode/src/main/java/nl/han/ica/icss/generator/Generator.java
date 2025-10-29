@@ -38,10 +38,6 @@ public class Generator {
 	private String generateIfClause(IfClause ifClause) {
 		StringBuilder result = new StringBuilder();
 
-		if (!(ifClause.conditionalExpression instanceof BoolLiteral)) {
-			return "";
-		}
-
 		BoolLiteral condition = (BoolLiteral) ifClause.conditionalExpression;
 
 		if (condition.value) {
