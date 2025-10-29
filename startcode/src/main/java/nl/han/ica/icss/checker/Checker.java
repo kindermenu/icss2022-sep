@@ -166,7 +166,7 @@ public class Checker {
             type = variableTypes.getLast().get(name);
             if (type == null) {
                 declaration.setError("Variable '" + name + "' is not defined in this scope");
-                type = UNDEFINED;
+                return;
             }
         }
         else{
