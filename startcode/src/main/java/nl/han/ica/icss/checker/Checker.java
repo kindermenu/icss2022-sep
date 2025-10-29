@@ -2,6 +2,9 @@ package nl.han.ica.icss.checker;
 
 import nl.han.ica.icss.ast.*;
 import nl.han.ica.icss.ast.literals.*;
+import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
 import java.util.HashMap;
@@ -50,8 +53,72 @@ public class Checker {
         if (expression instanceof PercentageLiteral) return ExpressionType.PERCENTAGE;
         if (expression instanceof ScalarLiteral) return ExpressionType.SCALAR;
         if (expression instanceof BoolLiteral) return ExpressionType.BOOL;
+        if (expression instanceof Operation) return checkOperation((Operation)expression);
 
         return ExpressionType.UNDEFINED;
+    }
+
+    private ExpressionType checkOperation(Operation operation) {
+        ExpressionType leftType = getExpressionType(operation.lhs);
+        ExpressionType rightType = getExpressionType(operation.rhs);
+
+        if (leftType == UNDEFINED || rightType == UNDEFINED) {
+            return UNDEFINED;
+        }
+
+        // plus en min
+        if (operation instanceof AddOperation || operation instanceof SubtractOperation) {
+
+            if (leftType == ExpressionType.PIXELSIZE && rightType == ExpressionType.PIXELSIZE) {
+                return ExpressionType.PIXELSIZE;
+            }
+
+            if (leftType == ExpressionType.PERCENTAGE && rightType == ExpressionType.PERCENTAGE) {
+                return ExpressionType.PERCENTAGE;
+            }
+
+            if (leftType == ExpressionType.PIXELSIZE && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.PIXELSIZE;
+            }
+
+            if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PIXELSIZE) {
+                return ExpressionType.PIXELSIZE;
+            }
+
+            if (leftType == ExpressionType.PERCENTAGE && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.PERCENTAGE;
+            }
+
+            if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PERCENTAGE) {
+                return ExpressionType.PERCENTAGE;
+            }
+
+            operation.setError("Invalid addition or subtraction between " + leftType + " and " + rightType);
+            return UNDEFINED;
+        }
+
+        if (operation instanceof MultiplyOperation) {
+
+            if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PIXELSIZE
+                    || leftType == ExpressionType.PIXELSIZE && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.PIXELSIZE;
+            }
+
+            if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PERCENTAGE
+                    || leftType == ExpressionType.PERCENTAGE && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.PERCENTAGE;
+            }
+
+            if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.SCALAR;
+            }
+
+            operation.setError("Invalid multiplication between " + leftType + " and " + rightType);
+            return UNDEFINED;
+        }
+
+        operation.setError("Unknown operation type");
+        return UNDEFINED;
     }
 
     private void checkStylerule(Stylerule rule) {
@@ -115,7 +182,5 @@ public class Checker {
             if (type != ExpressionType.COLOR)
                 declaration.setError("Property '" + declaration.property.name + "' must be a color");
         }
-
-        checkOperation(declaration.property.)
     }
 }
