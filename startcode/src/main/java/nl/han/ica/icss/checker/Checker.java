@@ -36,7 +36,6 @@ public class Checker {
     }
 
     private void checkVariableAssignment(VariableAssignment node) {
-        System.out.println("entered variable assignment");
         String name;
         Expression expression = node.expression;
 
@@ -44,7 +43,6 @@ public class Checker {
         name = node.name.name;
 
         variableTypes.getLast().put(name, type);
-        System.out.println(variableTypes);
     }
 
     private ExpressionType getExpressionType(Expression expression) {

@@ -1,8 +1,8 @@
 package nl.han.ica.icss.transforms;
 
 import nl.han.ica.icss.ast.*;
-import nl.han.ica.icss.ast.literals.PixelLiteral;
-import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.literals.*;
+import nl.han.ica.icss.ast.operations.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,67 +10,169 @@ import java.util.LinkedList;
 public class Evaluator implements Transform {
 
     private LinkedList<HashMap<String, Literal>> variableValues;
+
     public Evaluator() {
-        LinkedList<HashMap<String, Literal>> variableValues = new LinkedList<>();
+        variableValues = new LinkedList<>();
     }
 
     @Override
     public void apply(AST ast) {
-//        variableValues = new LinkedList<>();
+        variableValues.add(new HashMap<>());
         applyStylesheet(ast.root);
     }
 
     private void applyStylesheet(Stylesheet node) {
-        for (ASTNode child: node.getChildren()){
-            if (child instanceof Stylerule){
-                applyStylerule((Stylerule)child);
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof VariableAssignment) {
+                applyVariableAssignment((VariableAssignment) child);
             }
-            if (child instanceof VariableAssignment){
-                applyVariableAssignment((VariableAssignment)child);
-            }
-        }
-    }
-
-    private void applyStylerule(Stylerule node) {
-        for (ASTNode child: node.getChildren()){
-            if (child instanceof Declaration) {
-                applyDeclaration((Declaration) child);
+            if (child instanceof Stylerule) {
+                variableValues.add(new HashMap<>(variableValues.getLast()));
+                applyStylerule((Stylerule) child);
+                variableValues.removeLast();
             }
         }
     }
 
     private void applyVariableAssignment(VariableAssignment node) {
-        System.out.println("entered variable assignment");
-        String name;
-        Literal value;
-        name = node.name.name;
-        value = (Literal)node.expression;
-
-        HashMap<String, Literal> currentScope = variableValues.getLast();
-        currentScope.put(name, value);
-
-        variableValues.add(currentScope);
-        System.out.println(currentScope);
+        Literal value = evaluateExpression(node.expression);
+        variableValues.getLast().put(node.name.name, value);
     }
+
+    private void applyStylerule(Stylerule node) {
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof Declaration) {
+                applyDeclaration((Declaration) child);
+            }
+            if (child instanceof IfClause) {
+                applyIfClause((IfClause) child);
+            }
+        }
+    }
+
+    private void applyIfClause(IfClause node) {
+//        if (node.conditionalExpression instanceof VariableReference) {
+//            node.conditionalExpression = applyConditionExpression(node.conditionalExpression);
+//        }
+
+        node.conditionalExpression = evaluateExpression(node.conditionalExpression);
+
+        BoolLiteral condition = (BoolLiteral) node.conditionalExpression;
+
+        if (condition.value) {
+            for (ASTNode child : node.body) {
+                if (child instanceof Declaration)
+                    applyDeclaration((Declaration) child);
+                if (child instanceof IfClause)
+                    applyIfClause((IfClause) child);
+            }
+        } else {
+            if (node.elseClause != null) {
+                for (ASTNode child : node.elseClause.body) {
+                    if (child instanceof Declaration)
+                        applyDeclaration((Declaration) child);
+                    if (child instanceof IfClause)
+                        applyIfClause((IfClause) child);
+                }
+            }
+        }
+    }
+
+//    private Expression applyConditionExpression(Expression expr) {
+//        String name = ((VariableReference) expr).name;
+//        for (int i = variableValues.size() - 1; i >= 0; i--) {
+//            HashMap<String, Literal> scope = variableValues.get(i);
+//            if (scope.containsKey(name))
+//                return scope.get(name);
+//        }
+//        return new BoolLiteral("false");
+//    }
 
     private void applyDeclaration(Declaration node) {
         node.expression = evaluateExpression(node.expression);
     }
 
-    private Literal evaluateExpression(Expression expression) {
-        if (expression instanceof PixelLiteral){
-            return (PixelLiteral) expression;
+    private Literal evaluateExpression(Expression expr) {
+        if (expr instanceof VariableReference) {
+            String name = ((VariableReference) expr).name;
+            for (int i = variableValues.size() - 1; i >= 0; i--) {
+                HashMap<String, Literal> scope = variableValues.get(i);
+                if (scope.containsKey(name))
+                    return scope.get(name);
+            }
         }
-        else {
-            return evaluateAddOpperation((AddOperation)expression);
+
+        if (expr instanceof Literal) {
+            return (Literal) expr;
         }
+
+        if (expr instanceof Operation)
+            return evaluateOperation((Operation) expr);
+
+        return new ScalarLiteral(0);
     }
 
-    private PixelLiteral evaluateAddOpperation(AddOperation expression) {
-        PixelLiteral left = (PixelLiteral) evaluateExpression(expression.lhs);
-        PixelLiteral right = (PixelLiteral) evaluateExpression(expression.rhs);
-        return new PixelLiteral(left.value + right.value);
+    private Literal evaluateOperation(Operation operation) {
+        Literal left = evaluateExpression(operation.lhs);
+        Literal right = evaluateExpression(operation.rhs);
+
+        if (operation instanceof AddOperation) {
+            return handleAddSubtract(left, right, true);
+        }
+
+        if (operation instanceof SubtractOperation) {
+            return handleAddSubtract(left, right, false);
+        }
+
+        if (operation instanceof MultiplyOperation) {
+            return handleMultiply(left, right);
+        }
+
+        return new ScalarLiteral(0);
     }
 
+    private Literal handleAddSubtract(Literal left, Literal right, boolean isAdd) {
+        int positive = isAdd ? 1 : -1;
 
+        if (left instanceof PixelLiteral && right instanceof PixelLiteral) {
+            return new PixelLiteral(((PixelLiteral) left).value + positive * ((PixelLiteral) right).value);
+        }
+        if (left instanceof PercentageLiteral && right instanceof PercentageLiteral) {
+            return new PercentageLiteral(((PercentageLiteral) left).value + positive * ((PercentageLiteral) right).value);
+        }
+        if (left instanceof PixelLiteral && right instanceof ScalarLiteral) {
+            return new PixelLiteral(((PixelLiteral) left).value + positive * ((ScalarLiteral) right).value);
+        }
+        if (left instanceof ScalarLiteral && right instanceof PixelLiteral) {
+            return new PixelLiteral(((ScalarLiteral) left).value + positive * ((PixelLiteral) right).value);
+        }
+        if (left instanceof PercentageLiteral && right instanceof ScalarLiteral) {
+            return new PercentageLiteral(((PercentageLiteral) left).value + positive * ((ScalarLiteral) right).value);
+        }
+        if (left instanceof ScalarLiteral && right instanceof PercentageLiteral) {
+            return new PercentageLiteral(((ScalarLiteral) left).value + positive * ((PercentageLiteral) right).value);
+        }
+
+        return new PixelLiteral(0);
+    }
+
+    private Literal handleMultiply(Literal left, Literal right) {
+        if (left instanceof ScalarLiteral && right instanceof ScalarLiteral) {
+            return new ScalarLiteral(((ScalarLiteral) left).value * ((ScalarLiteral) right).value);
+        }
+        if (left instanceof ScalarLiteral && right instanceof PixelLiteral) {
+            return new PixelLiteral(((ScalarLiteral) left).value * ((PixelLiteral) right).value);
+        }
+        if (left instanceof PixelLiteral && right instanceof ScalarLiteral) {
+            return new PixelLiteral(((PixelLiteral) left).value * ((ScalarLiteral) right).value);
+        }
+        if (left instanceof ScalarLiteral && right instanceof PercentageLiteral) {
+            return new PercentageLiteral(((ScalarLiteral) left).value * ((PercentageLiteral) right).value);
+        }
+        if (left instanceof PercentageLiteral && right instanceof ScalarLiteral) {
+            return new PercentageLiteral(((PercentageLiteral) left).value * ((ScalarLiteral) right).value);
+        }
+
+        return new ScalarLiteral(0);
+    }
 }
