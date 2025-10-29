@@ -176,6 +176,13 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
+	public void exitColor_literal(ICSSParser.Color_literalContext ctx) {
+		ColorLiteral value = (ColorLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(value);
+	}
+
+	//OPERATIONS
+	@Override
 	public void exitAdd_operation(ICSSParser.Add_operationContext ctx) {
 		AddOperation value = (AddOperation) currentContainer.pop();
 		currentContainer.peek().addChild(value);
@@ -211,12 +218,7 @@ public class ASTListener extends ICSSBaseListener {
 		currentContainer.push(value);
 	}
 
-	@Override
-	public void exitColor_literal(ICSSParser.Color_literalContext ctx) {
-		ColorLiteral value = (ColorLiteral) currentContainer.pop();
-		currentContainer.peek().addChild(value);
-	}
-
+	//IF ELSE
 	@Override
 	public void enterElse_clause(ICSSParser.Else_clauseContext ctx) {
 		ElseClause value = new ElseClause();
@@ -241,6 +243,7 @@ public class ASTListener extends ICSSBaseListener {
 		currentContainer.peek().addChild(value);
 	}
 
+	//VARIABELEN
 	@Override
 	public void enterVariable_assignment(ICSSParser.Variable_assignmentContext ctx) {
 		VariableAssignment value = new VariableAssignment();

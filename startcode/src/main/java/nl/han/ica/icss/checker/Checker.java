@@ -18,19 +18,19 @@ public class Checker {
     private LinkedList<HashMap<String, ExpressionType>> variableTypes = new LinkedList<>();
     public void check(AST ast) {
 //         variableTypes = new HANLinkedList<>();
-        variableTypes.add(new HashMap<>());
+        variableTypes.add(new HashMap<>()); // lege hashmap toevoegen
         checkStylesheet(ast.root);
     }
 
     public void checkStylesheet(Stylesheet sheet){
-        for (ASTNode child : sheet.getChildren()) {
-            if (child instanceof VariableAssignment) {
+        for (ASTNode child : sheet.getChildren()) { //alle children afgaan
+            if (child instanceof VariableAssignment) { //eerst variabelen assignments afgaan
                 checkVariableAssignment((VariableAssignment) child);
             }
-            if (child instanceof Stylerule) {
-                variableTypes.add(new HashMap<>(variableTypes.getLast()));
+            if (child instanceof Stylerule) { // stylerules afgaan
+                variableTypes.add(new HashMap<>(variableTypes.getLast())); // nieuwe hashmap voor nieuwe scope
                 checkStylerule((Stylerule) child);
-                variableTypes.removeLast();
+                variableTypes.removeLast(); // hashmap weer verwijderen als je uit de scope gaat
             }
         }
     }
@@ -120,7 +120,12 @@ public class Checker {
     }
 
     private void checkStylerule(Stylerule rule) {
+        variableTypes.add(new HashMap<>(variableTypes.getLast()));
+
         for (ASTNode child : rule.getChildren()){
+            if (child instanceof VariableAssignment) {
+                checkVariableAssignment((VariableAssignment) child);
+            }
             if (child instanceof Declaration){
                 checkDeclaration((Declaration)child);
             }
@@ -128,6 +133,7 @@ public class Checker {
                 checkIfClause((IfClause)child);
             }
         }
+        variableTypes.removeLast();
     }
 
     private void checkIfClause(IfClause node) {

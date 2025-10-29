@@ -51,9 +51,9 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: (variable_assignment| stylerule)*;
-stylerule: selector OPEN_BRACE (if_clause | declaration)+ CLOSE_BRACE;
+stylerule: selector OPEN_BRACE (if_clause | variable_assignment | declaration)+ CLOSE_BRACE;
 selector: ID_IDENT #id_selector | CLASS_IDENT #class_selector | HTML_IDENT #tag_selector;
-declaration: property COLON value SEMICOLON;
+declaration:  property COLON value SEMICOLON;
 property: LOWER_IDENT;
 value: literal | variable_reference | operation;
 variable_reference: CAPITAL_IDENT;
@@ -69,11 +69,5 @@ operation:
     operation MUL operation #multiply_operation |
     operation MIN operation #subtract_operation |
     operation PLUS operation #add_operation;
-
-//operation: subtract_operation;
-//subtract_operation: subtract_operation MIN add_operation | add_operation;
-//add_operation: add_operation PLUS multiply_operation | multiply_operation;
-//multiply_operation: multiply_operation MUL factor | factor;
-//factor: literal | variable_reference;
 
 

@@ -40,7 +40,11 @@ public class Evaluator implements Transform {
     }
 
     private void applyStylerule(Stylerule node) {
+        variableValues.add(new HashMap<>(variableValues.getLast()));
         for (ASTNode child : node.getChildren()) {
+            if (child instanceof VariableAssignment) {
+                applyVariableAssignment((VariableAssignment) child);
+            }
             if (child instanceof Declaration) {
                 applyDeclaration((Declaration) child);
             }
@@ -48,12 +52,10 @@ public class Evaluator implements Transform {
                 applyIfClause((IfClause) child);
             }
         }
+        variableValues.removeLast();
     }
 
     private void applyIfClause(IfClause node) {
-//        if (node.conditionalExpression instanceof VariableReference) {
-//            node.conditionalExpression = applyConditionExpression(node.conditionalExpression);
-//        }
 
         node.conditionalExpression = evaluateExpression(node.conditionalExpression);
 
@@ -77,16 +79,6 @@ public class Evaluator implements Transform {
             }
         }
     }
-
-//    private Expression applyConditionExpression(Expression expr) {
-//        String name = ((VariableReference) expr).name;
-//        for (int i = variableValues.size() - 1; i >= 0; i--) {
-//            HashMap<String, Literal> scope = variableValues.get(i);
-//            if (scope.containsKey(name))
-//                return scope.get(name);
-//        }
-//        return new BoolLiteral("false");
-//    }
 
     private void applyDeclaration(Declaration node) {
         node.expression = evaluateExpression(node.expression);
