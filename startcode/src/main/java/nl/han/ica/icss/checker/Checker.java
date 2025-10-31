@@ -45,6 +45,7 @@ public class Checker {
         variableTypes.getLast().put(name, type);
     }
 
+    // functie voor ophalen van type
     private ExpressionType getExpressionType(Expression expression) {
         if (expression instanceof ColorLiteral) return ExpressionType.COLOR;
         if (expression instanceof PixelLiteral) return ExpressionType.PIXELSIZE;
@@ -95,6 +96,7 @@ public class Checker {
             return UNDEFINED;
         }
 
+        // keer
         if (operation instanceof MultiplyOperation) {
 
             if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PIXELSIZE
@@ -120,6 +122,7 @@ public class Checker {
     }
 
     private void checkStylerule(Stylerule rule) {
+        // nieuwe hashmap voor nieuwe stylerule
         variableTypes.add(new HashMap<>(variableTypes.getLast()));
 
         for (ASTNode child : rule.getChildren()){
@@ -140,6 +143,7 @@ public class Checker {
         Expression expr = node.conditionalExpression;
         ExpressionType type;
 
+        // checken op variabel
         if (expr instanceof VariableReference) {
             String name = ((VariableReference) expr).name;
             type = variableTypes.getLast().get(name);
@@ -162,6 +166,7 @@ public class Checker {
         ExpressionType type;
 
         if (expr instanceof VariableReference) {
+            // var type ophalen uit hashmap
             String name = ((VariableReference) expr).name;
             type = variableTypes.getLast().get(name);
             if (type == null) {

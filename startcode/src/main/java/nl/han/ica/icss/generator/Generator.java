@@ -21,6 +21,7 @@ public class Generator {
 
 	private String generateStylerule(Stylerule node) {
 		StringBuilder css = new StringBuilder();
+		// selector afdrukken
 		css.append(node.selectors.get(0).toString()).append(" {\n");
 
 		for (ASTNode child : node.body) {
@@ -39,7 +40,7 @@ public class Generator {
 		StringBuilder result = new StringBuilder();
 
 		BoolLiteral condition = (BoolLiteral) ifClause.conditionalExpression;
-
+		// bij true de body uitprinten
 		if (condition.value) {
 			for (ASTNode node : ifClause.body) {
 				if (node instanceof Declaration) {
@@ -48,6 +49,7 @@ public class Generator {
 					result.append(generateIfClause((IfClause) node));
 				}
 			}
+			// de else afdrukken als deze niet null is en als condition false is
 		} else if (ifClause.elseClause != null) {
 			result.append(generateElseClause(ifClause.elseClause));
 		}

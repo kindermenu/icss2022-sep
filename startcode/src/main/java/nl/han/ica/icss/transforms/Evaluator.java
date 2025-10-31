@@ -35,6 +35,7 @@ public class Evaluator implements Transform {
     }
 
     private void applyVariableAssignment(VariableAssignment node) {
+        // var values in hashmap zetten
         Literal value = evaluateExpression(node.expression);
         variableValues.getLast().put(node.name.name, value);
     }
@@ -86,9 +87,11 @@ public class Evaluator implements Transform {
 
     private Literal evaluateExpression(Expression expr) {
         if (expr instanceof VariableReference) {
+            // door de opgeslagen variablen heenlopen
             String name = ((VariableReference) expr).name;
-            for (int i = variableValues.size() - 1; i >= 0; i--) {
+            for (int i = variableValues.size() - 1; i >= 0; i--) { // achteraan begin zodat je de meest recente value pakt
                 HashMap<String, Literal> scope = variableValues.get(i);
+                // returnen als de juiste key gevonden is
                 if (scope.containsKey(name))
                     return scope.get(name);
             }
@@ -105,6 +108,7 @@ public class Evaluator implements Transform {
     }
 
     private Literal evaluateOperation(Operation operation) {
+        // operations afhandelen
         Literal left = evaluateExpression(operation.lhs);
         Literal right = evaluateExpression(operation.rhs);
 
